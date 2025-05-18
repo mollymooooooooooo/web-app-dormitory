@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Панель модерации</h2>
+    
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ post.image.url }}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.caption|truncatechars:30 }}</h5>
+                    <p class="card-text">Автор: @{{ post.user.username }}</p>
+                    <p class="card-text"><small class="text-muted">{{ post.created_at }}</small></p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'approve_post' post.id %}" class="btn btn-success">Одобрить</a>
+                        <a href="{% url 'reject_post' post.id %}" class="btn btn-danger">Отклонить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Нет мероприятий для модерации</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

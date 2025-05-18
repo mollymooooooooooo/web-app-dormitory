@@ -36,6 +36,8 @@
 
 <body>
     {% load static %}
+
+    {% block content %}
    <!-- this a modal code -->
 <div class="container-fluid">
     <div class="row">
@@ -87,7 +89,8 @@
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
         
             {% include "modal.html" %}
-        
+            {% include "search.html" %}
+
             <div>{% for pos in posts %}
                 <div class="container" id="{{pos.id}}">
                     <div class="row">
@@ -104,13 +107,7 @@
             
                                         <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary">Like: {{pos.num_likes}}</a>
             
-                                        <!-- {% if pos.num_likes == 0 %}
-                                        <p></p>
-                                        {% elif pos.num_likes == 1 %}
-                                        <p>Понравилось {{pos.num_likes}} человеку</p>
-                                        {% else %}
-                                        <p>Понравилось {{pos.num_likes}}</p>
-                                        {% endif %} -->
+                                        
                                         {% if pos.user != user.username %}
                                             <a href="/follow-post/{{pos.id}}" class="btn btn-outline-primary">
                                                 {% if pos.is_subscribed %}
@@ -165,6 +162,8 @@
 
     </div>
 </div>
+
+    {% endblock %}
 
     <script src="{% static 'js/app.js'%}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"

@@ -1,8 +1,29 @@
+import re
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from datetime import datetime
 import uuid
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+    email = models.EmailField(unique=True)
+    
+    def clean(self):
+        super().clean()
+        if not re.match(r'^[\w\.-]+@stud\.kpfu\.ru$', self.email):
+            raise ValidationError('Разрешена регистрация только с почтой @stud.kpfu.ru')
+    def save(self, *args, **kwargs):
+        super().clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
 
 User = get_user_model()
 
@@ -24,6 +45,8 @@ class Post(models.Model):
     created_at = models.DateTimeField(default=datetime.now)
     num_likes = models.IntegerField(default=0)
     subscribers = models.ManyToManyField(User, related_name='subscribed_posts', blank=True)
+    is_approved = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user

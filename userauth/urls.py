@@ -18,4 +18,8 @@ urlpatterns = [
     path('follow', views.follow, name='follow'),
     # path('post/<int:post_id>/follow/', views.follow_post, name='follow_post'),
     path('follow-post/<str:post_id>/', views.toggle_subscription, name='follow-post'),
+    path('search-events/', views.search_events, name='search_events'),
+    path('moderation_panel/', views.moderation_panel, name='moderation_panel'),
+    path('approve-post/<str:post_id>/', views.approve_post, name='approve_post'),
+    path('reject-post/<str:post_id>/', views.reject_post, name='reject_post'),
 ]
