@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+h2{
+    color: #2A668C;
+    text-align: center;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #2A668C;
+    border: none;
+    cursor: pointer;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    color: #999;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    background: white;
+    padding: 0 5px;
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+  top: -10px;
+  font-size: 12px;
+  color: #2A668C;
+  background: white;
+}
+
+.form-group textarea:focus + label,
+.form-group textarea:not(:placeholder-shown) + label {
+  top: -10px;
+  font-size: 12px;
+  color: #2A668C;
+  background: white;
+}
+
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2A668C;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background: #2A668C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background: #143245;
+}
+
+.cancel-button {
+    background: white;
+    color: #2A668C;
+    padding: 10px 20px;
+    border: 1px solid #2A668C;
+    cursor: pointer;
+}
+
+.custom-upload-container {
+    margin-top: 8px;
+}
+
+.custom-upload-button {
+    padding: 12px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    transition: all 0.3s;
+}
+
+.custom-upload-button:hover {
+    border-color: #2A668C;
+    color: #2A668C;
+    background-color: #f5f9fc;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.file-info span {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clear-file-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+}
+
+.clear-file-btn:hover {
+    color: #2A668C;
+}
+
+
+.char-counter {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 5px;
+}
+
+.moderation-notice {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.admin-notice {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.generate-ai-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    background-color: #2A668C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 8px 10px;
+    transition: background-color 0.5s ease;
+}
+
+.generate-ai-btn:hover {
+    background-color: #143245;
+}

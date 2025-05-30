@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+.container{
+  max-width: 1200px;
+  margin: auto;
+}
+
+.register-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 120px;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  margin-top: 100px;
+}
+
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 96px;
+  font-weight: 900;
+  color: #2A668C;
+}
+
+label {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  color: #ccc;
+  transition: all .3s ease;
+  pointer-events: none;
+}
+
+input {
+  border: none;
+  border-bottom: 2px solid #ccc;
+  padding: 8px 0;
+  background: transparent;
+  width: 100%;
+  outline: none;
+  transition: border .3s;
+}
+
+input:focus {
+  border-bottom-color: #2A668C;
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label{
+  top:-12px;
+  font-size: 12px;
+  color: #2A668C;
+}
+
+input::placeholder {
+  color: #2A668C;
+  font-style: italic;
+  opacity: 0;
+}
+
+.signup-container {
+  width: 400px;
+  min-width: 400px;
+  box-sizing: border-box;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.signup-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #000;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.signup-note {
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #d9534f;
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.signup-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2A668C;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.signup-button:hover {
+  background-color: #143245;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+  font-size: 15px;
+}
+
+.login-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
