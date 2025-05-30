@@ -10,9 +10,9 @@ router = DefaultRouter()
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
+    path('api/login/', views.user_login, name='api-login'),
     path('', views.home),
     path('api/signup/', views.signup, name='api-signup'),
-    path('api/login/', views.user_login, name='api-login'),
     path('api/logout/', views.user_logout, name='api-logout'),
     path('upload', views.upload, name='upload'),
     path('like-post/<str:id>', views.likes, name='like-post'),
@@ -44,4 +44,7 @@ urlpatterns = [
     path('posts/', views.PostList.as_view(), name='post-list'),
     path('api/follow-event/<uuid:event_id>/', views.toggle_event_subscription, name='toggle-event-subscription'),
     path('api/events/<uuid:event_id>/subscribers/', views.get_event_subscribers, name='event-subscribers'),
+    path('api/ai/generate_image/', views.generate_ai_image, name='generate_ai_image'),
+    path('api/activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
+    path('api/feedback/', views.submit_feedback, name='submit_feedback'),
 ] + router.urls

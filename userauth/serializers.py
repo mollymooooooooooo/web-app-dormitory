@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Profile, Post, LikePost, Followers, PostSubscribers, News, CustomUser
+from .models import Feedback, Profile, Post, LikePost, Followers, PostSubscribers, News, CustomUser
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -31,15 +31,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         request = self.context.get('request')
         
-        # Если аватар в самой модели User
         if hasattr(obj, 'avatar') and obj.avatar:
             return request.build_absolute_uri(obj.avatar.url) if request else obj.avatar.url
         
-        # Если аватар в связанной модели Profile
         if hasattr(obj, 'profile') and hasattr(obj.profile, 'profileimg') and obj.profile.profileimg:
             return request.build_absolute_uri(obj.profile.profileimg.url) if request else obj.profile.profileimg.url
         
-        # Возвращаем None, если аватар не найден
         return None
 
 class NewsSerializer(serializers.ModelSerializer):
@@ -76,6 +73,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            is_active=False
         )
         return user
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at')
+
+        def create(self, validated_data):
+            request = self.context.get('request')
+            if request and request.user.is_authenticated:
+                validated_data['user'] = request.user
+            return super().create(validated_data)

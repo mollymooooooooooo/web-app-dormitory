@@ -29,16 +29,27 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     email = models.EmailField(unique=True)
+    email_verified = models.BooleanField(default=False)
 
     objects = CustomUserManager()
     
     def clean(self):
         super().clean()
-        if not re.match(r'^[\w\.-]+@stud\.kpfu\.ru$', self.email):
-            raise ValidationError('Разрешена регистрация только с почтой @stud.kpfu.ru')
+        if not self.pk or 'email' in self.get_dirty_fields():
+            if not re.match(r'^[\w\.-]+@stud\.kpfu\.ru$', self.email):
+                raise ValidationError('Разрешена регистрация только с почтой @stud.kpfu.ru')
     def save(self, *args, **kwargs):
         super().clean()
         super().save(*args, **kwargs)
+
+    def get_dirty_fields(self):
+        dirty_fields = {}
+        if self.pk:
+            old_instance = CustomUser.objects.get(pk=self.pk)
+            for field in self._meta.fields:
+                if getattr(self, field.name) != getattr(old_instance, field.name):
+                    dirty_fields[field.name] = getattr(old_instance, field.name)
+        return dirty_fields
 
     def __str__(self):
         return self.username
@@ -117,3 +128,34 @@ class News(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class Feedback(models.Model):
+    CATEGORY_CHOICES = (
+        ('question', 'Вопрос'),
+        ('suggestion', 'Предложение'),
+        ('problem', 'Проблема'),
+        ('complaint', 'Жалоба'),
+        ('other', 'Другое')
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name='Пользователь', blank=True)
+    name = models.CharField(max_length=100, verbose_name='Имя', blank=True)
+    room = models.CharField(max_length=20, verbose_name='Номер комнаты', blank=True)
+    email = models.EmailField(max_length=100, verbose_name='Email', blank=True)
+    phone = models.CharField(max_length=20, verbose_name='Телефон', blank=True)
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        verbose_name='Тип обращения',
+        default='question'
+    )
+    message = models.TextField(verbose_name='Сообщение')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    
+    class Meta:
+        verbose_name = 'Обращение'
+        verbose_name_plural = 'Обращения'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} - {self.get_category_display()}'

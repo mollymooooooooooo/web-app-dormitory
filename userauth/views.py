@@ -1,4 +1,5 @@
 from itertools import chain
+from django.conf import settings
 from  django . shortcuts  import  get_object_or_404, render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -11,11 +12,25 @@ from django.core.exceptions import ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny, BasePermission
 from rest_framework.response import Response
-from .serializers import NewsSerializer, PostSerializer, UserProfileSerializer, UserRegistrationSerializer
+from .serializers import FeedbackSerializer, NewsSerializer, PostSerializer, UserProfileSerializer, UserRegistrationSerializer
 from rest_framework import viewsets, status, generics
 from django.views.decorators.csrf import csrf_exempt
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMessage, send_mail
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.html import strip_tags
+
+from diffusers import StableDiffusionPipeline
+import torch
+from io import BytesIO
+import base64
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,7 +55,6 @@ class PostList(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Post.objects.filter(is_approved=True).order_by('-created_at')
         
-        # Добавляем фильтрацию по пользователю, если передан параметр user
         username = self.request.query_params.get('user', None)
         if username is not None:
             queryset = queryset.filter(user=username)
@@ -67,50 +81,122 @@ def validate_email(email):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    print("Полученные данные:", request.data)
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         try:
             validate_email(serializer.validated_data['email'])
-            user = serializer.save()
+            user = serializer.save(is_active=False)
             Profile.objects.create(user=user, id_user=user.id)
-            return Response({'success': True}, status=status.HTTP_201_CREATED)
+            
+            if not send_verification_email(user, request):
+                user.delete()
+                return Response(
+                    {'error': 'Не удалось отправить письмо подтверждения'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+            return Response({
+                'success': True,
+                'message': 'Письмо с подтверждением отправлено'
+            }, status=status.HTTP_201_CREATED)
+            
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+def send_verification_email(user, request):
+    try:
+        current_site = get_current_site(request)
+        subject = 'Активация аккаунта на сайте Дома 3/1'
+        html_message = render_to_string('verify_email.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': default_token_generator.make_token(user),
+        })
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=None,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка отправки письма: {str(e)}")
+        return False
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def user_login(request):
+    print("Получен запрос на вход")
     try:
-        logger.info(f"Получены данные: {request.data}")
-        
-        email = request.data.get('email')
-        password = request.data.get('password')
-        
-        if not email or not password:
-            return Response({'error': 'Email и пароль обязательны'}, status=400)
-        
         try:
-            user = User.objects.get(email=email.lower())  # Нормализация email
-        except User.DoesNotExist:
-            return Response({'error': 'Пользователь не найден'}, status=404)
+            if hasattr(request, 'data') and isinstance(request.data, dict):
+                data = request.data
+            else:
+                data = json.loads(request.body.decode('utf-8'))
+        except Exception as e:
+            print("Ошибка парсинга JSON:", str(e))
+            return Response(
+                {'error': 'Неверный формат данных'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        print("Полученные данные:", data)
+
+        identifier = data.get('email') or data.get('username') or ''
+        password = data.get('password', '')
+
+        if not identifier or not password:
+            print("Отсутствует email/username или пароль")
+            return Response(
+                {'error': 'Требуется email/username и пароль'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        print(f"Попытка входа для: {identifier}")
         
-        user = authenticate(username=user.username, password=password)
+        user = authenticate(
+            request,
+            username=identifier.strip(),
+            password=password.strip()
+        )
+
         if not user:
-            return Response({'error': 'Неверный пароль'}, status=400)
-        
+            print("Неверные учетные данные")
+            return Response(
+                {'error': 'Неверный email/username или пароль'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not user.is_active:
+            print("Пользователь не активирован")
+            return Response(
+                {'error': 'Аккаунт не активирован'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         refresh = RefreshToken.for_user(user)
+        print(f"Успешный вход для: {user.username}")
         
         return Response({
             'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'username': user.username,
-            'role': user.role
+            'role': user.role,
+            'email': user.email
         })
-        
+
     except Exception as e:
-        logger.exception("Ошибка при входе:")
-        return Response({'error': 'Внутренняя ошибка сервера'}, status=500)
+        print("Ошибка при входе:", str(e))
+        return Response(
+            {'error': 'Внутренняя ошибка сервера'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @permission_classes([IsAuthenticated])
 def user_logout(request):
@@ -167,10 +253,8 @@ def likes(request, id):
 
         post.save()
 
-        # Generate the URL for the current post's detail page
         print(post.id)
 
-        # Redirect back to the post's detail page
         return redirect(request.META.get('HTTP_REFERER', '/'))
     
 @api_view(['GET'])
@@ -275,19 +359,16 @@ def profile_api(request, username):
             })
             
         elif request.method == 'PATCH':
-            # Обновляем поля профиля
             if 'bio' in request.data:
                 profile.bio = request.data['bio']
             if 'location' in request.data:
                 profile.location = request.data['location']
             
-            # Обрабатываем загрузку изображения
             if 'profileimg' in request.FILES:
                 profile.profileimg = request.FILES['profileimg']
             
             profile.save()
             
-            # Возвращаем обновленные данные
             return Response({
                 'username': user.username,
                 'email': user.email,
@@ -442,11 +523,11 @@ def approve_post(request, pk):
     except Post.DoesNotExist:
         return Response({'error': 'Нет такой записи'}, status=404)
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes([IsAdmin])
-def reject_post(request, post_id):
+def reject_post(request, pk):
     try:
-        post = Post.objects.get(pk=post_id)
+        post = Post.objects.get(pk=pk)
         post.delete()
         return Response({'success': True}, status=200)
     except Post.DoesNotExist:
@@ -457,7 +538,6 @@ def reject_post(request, post_id):
 @permission_classes([IsAuthenticated])
 def create_post(request):
     try:
-        # Проверяем, является ли пользователь администратором
         is_admin = request.user.role == 'admin'
         
         post = Post.objects.create(
@@ -465,28 +545,13 @@ def create_post(request):
             image=request.FILES.get('image'),
             caption=request.data.get('caption'),
             description=request.data.get('description'),
-            is_approved=is_admin  # Автоматически одобряем для администраторов
+            is_approved=is_admin
         )
         
         serializer = PostSerializer(post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['GET'])
-# def get_news(request):
-#     news = News.objects.filter(is_published=True).order_by('-created_at')
-#     serializer = NewsSerializer(news, many=True)
-#     return Response(serializer.data)
-
-# @api_view(['POST'])
-# @permission_classes([IsAdminUser])
-# def create_news(request):
-#     serializer = NewsSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save(author=request.user)
-#         return Response(serializer.data, status=201)
-#     return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -513,7 +578,6 @@ def news_list(request):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        # Только админы могут создавать новости
         if not request.user.role == 'admin':
             return Response({'error': 'Недостаточно прав'}, status=403)
             
@@ -578,3 +642,94 @@ def get_event_subscribers(request, event_id):
         return Response(serializer.data)
     except Post.DoesNotExist:
         return Response({'error': 'Event not found'}, status=404)
+    
+pipe = None
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_ai_image(request):
+    global pipe
+    if not request.data.get('prompt'):
+        return Response({'error': 'Prompt is required'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        if pipe is None:
+            pipe = StableDiffusionPipeline.from_pretrained(
+                "stabilityai/stable-diffusion-2-1",
+                torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+            )
+            pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+            logger.info("Stable Diffusion model loaded")
+
+        prompt = request.data.get('prompt', '')
+        if not prompt:
+            return Response({'error': 'Prompt is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        image = pipe(prompt).images[0]
+        
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return Response({'image': img_str})
+
+    except Exception as e:
+        logger.error(f"Generation error: {str(e)}")
+        return Response(
+            {'error': 'Internal server error'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.email_verified = True
+        user.save()
+        return render(request, 'activation_success.html', {
+            'user': user
+        })
+    else:
+        return render(request, 'activation_failed.html', status=400)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def submit_feedback(request):
+    try:
+        serializer = FeedbackSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            feedback = serializer.save()
+
+            send_mail(
+                subject=f'Новое обращение: {feedback.get_category_display()}',
+                message=f'''
+                Имя: {feedback.name}
+                Номер комнаты: {feedback.room}
+                Email: {feedback.email}
+                Телефон: {feedback.phone}
+                Тип обращения: {feedback.get_category_display()}
+                Сообщение: {feedback.message}
+                ''',
+                from_email=None,
+                recipient_list=[settings.KOMENDANT_EMAIL],
+                fail_silently=True,
+            )
+
+            return Response({
+                'success': True,
+                'message': 'Сообщение отправлено'
+            }, status=status.HTTP_201_CREATED)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.error(f"Ошибка при отправке сообщения: {str(e)}")
+        return Response(
+            {'error': 'Ошибка при отправке обращения'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
