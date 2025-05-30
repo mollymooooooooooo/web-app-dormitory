@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.main-container {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+}
+
+.content-wrapper {
+    position: absolute;
+    top: 85px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+}
+
+.content-area {
+    flex: 1;
+    padding: 20px;
+    margin-left: 80px;
+    transition: margin-left 0.3s;
+}
+
+.slide-menu {
+    width: 80px;
+    height: 100%;
+    background: #2A668C;
+    transition: width 0.3s;
+    position: fixed;
+    left: 0;
+    top: 85px;
+    z-index: 900;
+}
+
+.slide-menu.expanded ~ .content-area {
+    margin-left: 320px;
+}
+
+.header-toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #2A668C;
+    border-radius: 8px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-form input {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 300px;
+    color: white;
+}
+
+.create-event-button {
+    padding: 8px 15px;
+    background: #2A668C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.3s;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.post-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.submit-btn {
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    color: #2A668C;
+}
+
+.submit-btn:hover {
+    background: #2A668C;
+    color: white;
+}
+
+.subscribe-btn {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #2A668C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.subscribe-btn:hover:not(:disabled) {
+    background-color: #143245;
+}
+
+.subscribe-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.subscribe-btn.subscribed {
+    background-color: #008f48;
+}
+
+.subscribe-btn.subscribed:hover {
+    background-color: #006b30;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.clear-btn {
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    color: #2A668C;
+}
+
+.clear-btn:hover {
+    background: #2A668C;
+    color: white;
+}
+
+.view-participants-btn {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #2A668C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.view-participants-btn:hover{
+    background-color: #143245;
+}

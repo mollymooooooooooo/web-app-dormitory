@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Подтверждение email</title>
+</head>
+<body>
+    <p>Здравствуйте, {{ user.username }}!</p>
+    <p>Для активации аккаунта перейдите по ссылке:</p>
+    <p>
+        <a href="http://{{ domain }}/api/activate/{{ uid }}/{{ token }}/">
+            Активировать аккаунт
+        </a>
+    </p>
+</body>
+</html>

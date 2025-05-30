@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.slide-menu {
+    position: fixed;
+    left: 0;
+    width: 60px;
+    height: 100vh;
+    background-color: #2A668C;
+    transition: width 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.slide-menu.expanded {
+    width: 320px;
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 12px 15px;
+    transition: background-color 0.3s;
+}
+
+.menu-item:hover {
+    background-color: #143245;
+}
+
+.menu-icon {
+    font-size: 24px;
+    min-width: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.menu-title {
+    margin-left: 15px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.slide-menu.expanded .menu-title {
+    opacity: 1;
+}
+
+.svg-icon {
+    width: 35px;
+    height: 35px;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover .svg-icon {
+    transform: scale(1.1);
+    filter: invert(75%) sepia(54%) saturate(347%) hue-rotate(162deg) brightness(89%) contrast(91%);
+}
