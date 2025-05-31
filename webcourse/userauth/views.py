@@ -97,7 +97,8 @@ def signup(request):
                 
             return Response({
                 'success': True,
-                'message': 'Письмо с подтверждением отправлено'
+                'message': 'Письмо с подтверждением отправлено',
+                'requires_activation': True
             }, status=status.HTTP_201_CREATED)
             
         except ValidationError as e:

@@ -109,8 +109,8 @@ export const AuthProvider = ({ children }) => {
       }
     );
       if (response.data.success) {
-        await login(username, password);
-        return { success: true };
+        // await login(username, password);
+        return { success: true, requiresActivation: response.data.requires_activation };
     }
     } catch (error) {
       console.error('Signup error details:', error.response?.data);

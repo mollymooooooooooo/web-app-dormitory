@@ -29,7 +29,7 @@ const Signup = () => {
             const result = await signup(formData.username, formData.email, formData.password);
 
             if (result.success) {
-                navigate("/");
+                navigate("/user_login");
             } else if (result.error) {
                 setError(result.error);
             }
