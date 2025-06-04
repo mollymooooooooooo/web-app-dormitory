@@ -9,7 +9,6 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
     path('api/login/', views.user_login, name='api-login'),
     path('', views.home),
     path('api/signup/', views.signup, name='api-signup'),
@@ -20,14 +19,7 @@ urlpatterns = [
     path('explore', views.explore),
     path('profile/<str:id_user>', views.profile),
     path('follow', views.follow, name='follow'),
-    # path('post/<int:post_id>/follow/', views.follow_post, name='follow_post'),
-    # path('follow-post/<str:post_id>/', views.toggle_subscription, name='follow-post'),
     path('api/search-events/', views.search_events, name='search_events'),
-    # path('moderation_panel/', views.moderation_panel, name='moderation_panel'),
-    # path('approve-post/<str:post_id>/', views.approve_post, name='approve_post'),
-    # path('reject-post/<str:post_id>/', views.reject_post, name='reject_post'),
-    # path('api/news/', views.get_news, name='get_news'),
-    # path('api/create_news/', views.create_news, name='create_news'),
     path('api/news/', views.news_list, name='news-list'),
     path('api/news/<uuid:pk>/', views.delete_news, name='delete_news'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import api from "../api/api";
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,8 @@ const Profile = () => {
     const [posts, setPosts] = useState([]);
     const [news, setNews] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
+    const fileInputRef = useRef(null);
+    const [fileName, setFileName] = useState('');
     const [formData, setFormData] = useState({
         bio: '',
         location: '',
@@ -47,6 +49,10 @@ const Profile = () => {
         fetchData();
     }, [username]);
 
+    const handleCustomUploadClick = () => {
+        fileInputRef.current.click();
+    }
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -63,6 +69,7 @@ const Profile = () => {
                 profileimg: file
             }));
             setImagePreview(URL.createObjectURL(file));
+            setFileName(file.name);
         }
     };
 
@@ -82,8 +89,7 @@ const Profile = () => {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
-        // Обновляем данные профиля
+
         setProfileData(prev => ({
             ...prev,
             profile: {
@@ -113,7 +119,7 @@ const Profile = () => {
         <div className="profile-container">
             <Header user={{
                     username: profileData.username,
-                    name: profileData.username, // или другое поле с именем
+                    name: profileData.username,
                     avatar: profileData.profile.profileimg,
                     role: profileData.role
                 }}  PageName="профиль" />
@@ -163,6 +169,26 @@ const Profile = () => {
                 <div className="profile-details-section">
                     {isEditing ? (
                         <form onSubmit={handleSubmit} className="profile-edit-form">
+                            <div className="form-group">
+                                <div className="custom-upload-container">
+                                    <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef} style={{display: 'none'}}/>
+                                    <div className="custom-upload-button" onClick={handleCustomUploadClick}>
+                                        {fileName || "Добавьте фото"}
+                                    </div>
+                                    {fileName && (
+                                        <div className="file-info">
+                                            <span>{fileName}</span>
+                                            <button type="button" className="clear-file-btn" onClick={() => {
+                                                setFormData(prev => ({ ...prev, profileimg: null}));
+                                                setFileName('');
+                                            }}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        )}
+                                </div>
+                            </div>
                             <div className="form-group">
                                 <textarea
                                     name="bio"
@@ -222,7 +248,6 @@ const Profile = () => {
                                         <p>{post.description}</p>
                                         <div className="post-meta">
                                             <span>Дата: {new Date(post.created_at).toLocaleDateString('ru-RU')}</span>
-                                            <span>Лайков: {post.num_likes}</span>
                                         </div>
                                     </div>
                                 ))

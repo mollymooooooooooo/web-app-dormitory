@@ -29,14 +29,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'avatar', 'role']
 
     def get_avatar(self, obj):
-        request = self.context.get('request')
         
-        if hasattr(obj, 'avatar') and obj.avatar:
-            return request.build_absolute_uri(obj.avatar.url) if request else obj.avatar.url
+        # if hasattr(obj, 'avatar') and obj.avatar:
+        #     return request.build_absolute_uri(obj.avatar.url) if request else obj.avatar.url
         
-        if hasattr(obj, 'profile') and hasattr(obj.profile, 'profileimg') and obj.profile.profileimg:
-            return request.build_absolute_uri(obj.profile.profileimg.url) if request else obj.profile.profileimg.url
-        
+        if hasattr(obj, 'profile') and obj.profile.profileimg:
+            url = obj.profile.profileimg.url
+            request = self.context.get('request')
+            return request.build_absolute_uri(url) if request else url
         return None
 
 class NewsSerializer(serializers.ModelSerializer):

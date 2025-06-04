@@ -343,10 +343,6 @@ def profile_api(request, username):
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
         
-        if request.user != user:
-            return Response({'error': 'Вы можете редактировать только свой профиль'}, 
-                          status=status.HTTP_403_FORBIDDEN)
-        
         if request.method == 'GET':
             return Response({
                 'username': user.username,
@@ -366,6 +362,8 @@ def profile_api(request, username):
                 profile.location = request.data['location']
             
             if 'profileimg' in request.FILES:
+                if profile.profileimg and 'default-profile.png' not in profile.profileimg.name:
+                    profile.profileimg.delete(False)
                 profile.profileimg = request.FILES['profileimg']
             
             profile.save()

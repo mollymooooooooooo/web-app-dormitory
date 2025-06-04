@@ -196,8 +196,6 @@ const EventsPage = () => {
                                 <div className="post-footer">
                                     <span>Автор: {event.user}</span>
                                     <span>Дата: {new Date(event.created_at).toLocaleDateString('ru-RU')}</span>
-                                    <span>Количество подписчиков: {event.subscribers.length}</span>
-                                    {/* <span>Лайков: {event.num_likes}</span> */}
                                 </div>
 
                                 <div className="post-actions">

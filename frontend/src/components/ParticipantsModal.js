@@ -2,6 +2,7 @@ import React from 'react';
 import './ParticipantsModal.css';
 
 const ParticipantsModal = ({ participants=[], onClose }) => {
+    console.log('Participants data:', participants);
     return (
         <div className="modal-overlay">
             <div className="participants-modal">
@@ -15,12 +16,12 @@ const ParticipantsModal = ({ participants=[], onClose }) => {
                         participants.map(user => (
                                 <div key={user.id} className="participant-item">
                                 <img
-                                    src={user.avatar || '/profilepics/default-profile.png'}
+                                    src={user.avatar || 'media/profilepics/default-profile.png'}
                                     alt={user.name}
                                     className="participant-avatar"
                                     
                                 />
-                                <span className="participant-name">{user.name}</span>
+                                <a href={`/profile/${user.name}`} className="participant-name">{user.name}</a>
                             </div>
                         ))
                     ) : (
